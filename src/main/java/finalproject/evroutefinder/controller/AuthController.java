@@ -1,5 +1,7 @@
 package finalproject.evroutefinder.controller;
 
+import finalproject.evroutefinder.dto.AuthenticationResponse;
+import finalproject.evroutefinder.dto.LoginRequest;
 import finalproject.evroutefinder.dto.RegisterRequest;
 import finalproject.evroutefinder.service.AuthService;
 import lombok.AllArgsConstructor;
@@ -25,5 +27,10 @@ public class AuthController {
     public ResponseEntity<String> verifyAccount(@PathVariable String token){
         authService.verifyAccount(token);
         return new ResponseEntity<>("Account Activated Successfully", HttpStatus.OK);
+    }
+
+    @PostMapping("/login")
+    public AuthenticationResponse login(@RequestBody LoginRequest loginRequest){
+       return authService.login(loginRequest);
     }
 }

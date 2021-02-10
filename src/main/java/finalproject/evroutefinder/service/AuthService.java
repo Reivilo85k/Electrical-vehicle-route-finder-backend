@@ -1,6 +1,7 @@
 package finalproject.evroutefinder.service;
 
-import com.sun.xml.bind.v2.runtime.SchemaTypeTransducer;
+import finalproject.evroutefinder.dto.AuthenticationResponse;
+import finalproject.evroutefinder.dto.LoginRequest;
 import finalproject.evroutefinder.dto.RegisterRequest;
 import finalproject.evroutefinder.exceptions.EVRouteFinderException;
 import finalproject.evroutefinder.model.AppUser;
@@ -8,11 +9,14 @@ import finalproject.evroutefinder.model.NotificationEmail;
 import finalproject.evroutefinder.model.VerificationToken;
 import finalproject.evroutefinder.repository.UserRepository;
 import finalproject.evroutefinder.repository.VerificationTokenRepository;
+import finalproject.evroutefinder.security.JwtProvider;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.validation.beanvalidation.SpringValidatorAdapter;
 
 import javax.transaction.Transactional;
 import java.time.Instant;
@@ -27,7 +31,9 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
     private final VerificationTokenRepository verificationTokenRepository;
-    private MailService mailService;
+    private final MailService mailService;
+    private final AuthenticationManager authenticationManager;
+    private final JwtProvider jwtProvider;
 
     public void signup(RegisterRequest registerRequest) {
         AppUser appUser = new AppUser();
@@ -62,7 +68,6 @@ public class AuthService {
         fetchUserAndEnable(verificationToken.get());
     }
 
-    @Transactional
     private void fetchUserAndEnable(VerificationToken verificationToken){
         String username = verificationToken.getAppUser().getUsername();
         AppUser appUser = userRepository.findByUsername(username).orElseThrow(()-> new EVRouteFinderException("User not found with name "
@@ -71,4 +76,11 @@ public class AuthService {
         userRepository.save(appUser);
     }
 
+    public AuthenticationResponse login(LoginRequest loginRequest){
+        Authentication authenticate = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(),
+                loginRequest.getPassword()));
+        SecurityContextHolder.getContext().setAuthentication(authenticate);
+        String token = jwtProvider.generateToken(authenticate);
+        return new AuthenticationResponse(token, loginRequest.getUsername());
+    }
 }
