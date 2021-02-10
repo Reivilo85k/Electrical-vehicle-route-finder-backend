@@ -19,6 +19,7 @@ import java.util.UUID;
 
 @Service
 @AllArgsConstructor
+@Transactional
 public class AuthService {
 
     private final PasswordEncoder passwordEncoder;
@@ -26,7 +27,6 @@ public class AuthService {
     private final VerificationTokenRepository verificationTokenRepository;
     private MailService mailService;
 
-    @Transactional
     public void signup(RegisterRequest registerRequest) {
         AppUser appUser = new AppUser();
         appUser.setUsername(registerRequest.getUsername());
