@@ -2,6 +2,7 @@ package finalproject.evroutefinder.service;
 
 import com.sun.xml.bind.v2.runtime.SchemaTypeTransducer;
 import finalproject.evroutefinder.dto.RegisterRequest;
+import finalproject.evroutefinder.exceptions.EVRouteFinderException;
 import finalproject.evroutefinder.model.AppUser;
 import finalproject.evroutefinder.model.NotificationEmail;
 import finalproject.evroutefinder.model.VerificationToken;
@@ -15,6 +16,7 @@ import org.springframework.validation.beanvalidation.SpringValidatorAdapter;
 
 import javax.transaction.Transactional;
 import java.time.Instant;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -52,6 +54,21 @@ public class AuthService {
 
             verificationTokenRepository.save(verificationToken);
             return token;
-        };
+        }
+
+    public void verifyAccount(String token){
+        Optional<VerificationToken> verificationToken = verificationTokenRepository.findByToken(token);
+        verificationToken.orElseThrow(() -> new EVRouteFinderException("Invalid Token"));
+        fetchUserAndEnable(verificationToken.get());
+    }
+
+    @Transactional
+    private void fetchUserAndEnable(VerificationToken verificationToken){
+        String username = verificationToken.getAppUser().getUsername();
+        AppUser appUser = userRepository.findByUsername(username).orElseThrow(()-> new EVRouteFinderException("User not found with name "
+                + username));
+        appUser.setEnabled(true);
+        userRepository.save(appUser);
+    }
 
 }
