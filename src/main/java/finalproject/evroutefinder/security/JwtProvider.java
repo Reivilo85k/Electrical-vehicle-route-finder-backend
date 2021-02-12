@@ -1,7 +1,7 @@
 package finalproject.evroutefinder.security;
 
-
 import finalproject.evroutefinder.exceptions.EVRouteFinderException;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.User;
@@ -13,8 +13,7 @@ import java.io.InputStream;
 import java.security.*;
 import java.security.cert.CertificateException;
 
-
-import java.security.KeyStore;
+import static io.jsonwebtoken.Jwts.parser;
 
 @Service
 public class JwtProvider {
@@ -34,7 +33,7 @@ public class JwtProvider {
     }
 
     public String generateToken(Authentication authentication) {
-        User principal = (User) authentication.getPrincipal();
+        org.springframework.security.core.userdetails.User principal = (User) authentication.getPrincipal();
         return Jwts.builder()
                 .setSubject(principal.getUsername())
                 .signWith(getPrivateKey())
@@ -49,4 +48,25 @@ public class JwtProvider {
         }
     }
 
+    public boolean validateToken(String jwt){
+        parser().setSigningKey(getPublicKey()).parseClaimsJws(jwt);
+        return true;
+    }
+
+    private PublicKey getPublicKey() {
+        try{
+            return keyStore.getCertificate("springblog").getPublicKey();
+        }catch (KeyStoreException e) {
+            throw new EVRouteFinderException("Exception occurred while retrieving public key from keystore");
+        }
+    }
+
+    public String getUsernameFromJWT(String token){
+        Claims claims = parser()
+                .setSigningKey(getPublicKey())
+                .parseClaimsJws(token)
+                .getBody();
+
+        return claims.getSubject() ;
+    }
 }

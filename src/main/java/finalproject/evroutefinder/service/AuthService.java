@@ -15,17 +15,16 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import javax.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
 @Service
 @AllArgsConstructor
-@Transactional
 public class AuthService {
 
     private final PasswordEncoder passwordEncoder;
@@ -35,6 +34,7 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtProvider jwtProvider;
 
+    @Transactional
     public void signup(RegisterRequest registerRequest) {
         AppUser appUser = new AppUser();
         appUser.setUsername(registerRequest.getUsername());
@@ -52,7 +52,24 @@ public class AuthService {
                 "http://localhost:8080/api/auth/accountVerification/" + token));
     }
 
-        private String generateVerificationToken(AppUser appUser){
+    @Transactional(readOnly = true)
+    AppUser getCurrentAppUser(){
+        org.springframework.security.core.userdetails.User principal = (org.springframework.security.core.userdetails.User) SecurityContextHolder.
+                getContext().getAuthentication().getPrincipal();
+        return userRepository.findByUsername(principal.getUsername())
+                .orElseThrow(() -> new UsernameNotFoundException("User name not found - " + principal.getUsername()));
+    }
+
+    private void fetchUserAndEnable(VerificationToken verificationToken){
+        String username = verificationToken.getAppUser().getUsername();
+        AppUser appUser = userRepository.findByUsername(username).orElseThrow(()-> new EVRouteFinderException("User not found with name "
+                + username));
+        appUser.setEnabled(true);
+        userRepository.save(appUser);
+    }
+
+
+    private String generateVerificationToken(AppUser appUser){
             String token = UUID.randomUUID().toString();
             VerificationToken verificationToken = new VerificationToken();
             verificationToken.setToken(token);
@@ -64,20 +81,13 @@ public class AuthService {
 
     public void verifyAccount(String token){
         Optional<VerificationToken> verificationToken = verificationTokenRepository.findByToken(token);
-        verificationToken.orElseThrow(() -> new EVRouteFinderException("Invalid Token"));
-        fetchUserAndEnable(verificationToken.get());
+        fetchUserAndEnable(verificationToken.orElseThrow(() -> new EVRouteFinderException("Invalid Token")));
     }
 
-    private void fetchUserAndEnable(VerificationToken verificationToken){
-        String username = verificationToken.getAppUser().getUsername();
-        AppUser appUser = userRepository.findByUsername(username).orElseThrow(()-> new EVRouteFinderException("User not found with name "
-                + username));
-        appUser.setEnabled(true);
-        userRepository.save(appUser);
-    }
 
     public AuthenticationResponse login(LoginRequest loginRequest){
-        Authentication authenticate = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(),
+        Authentication authenticate = authenticationManager.authenticate(new
+                UsernamePasswordAuthenticationToken(loginRequest.getUsername(),
                 loginRequest.getPassword()));
         SecurityContextHolder.getContext().setAuthentication(authenticate);
         String token = jwtProvider.generateToken(authenticate);
