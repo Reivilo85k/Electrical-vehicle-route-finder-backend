@@ -2,6 +2,7 @@ package finalproject.evroutefinder.service;
 
 import finalproject.evroutefinder.dto.AuthenticationResponse;
 import finalproject.evroutefinder.dto.LoginRequest;
+import finalproject.evroutefinder.dto.RefreshTokenRequest;
 import finalproject.evroutefinder.dto.RegisterRequest;
 import finalproject.evroutefinder.exceptions.EVRouteFinderException;
 import finalproject.evroutefinder.model.AppUser;
@@ -25,6 +26,7 @@ import java.util.UUID;
 
 @Service
 @AllArgsConstructor
+@Transactional
 public class AuthService {
 
     private final PasswordEncoder passwordEncoder;
@@ -33,6 +35,7 @@ public class AuthService {
     private final MailService mailService;
     private final AuthenticationManager authenticationManager;
     private final JwtProvider jwtProvider;
+    private final RefreshTokenService refreshTokenService;
 
     @Transactional
     public void signup(RegisterRequest registerRequest) {
@@ -54,15 +57,19 @@ public class AuthService {
 
     @Transactional(readOnly = true)
     AppUser getCurrentAppUser(){
-        org.springframework.security.core.userdetails.User principal = (org.springframework.security.core.userdetails.User) SecurityContextHolder.
+        org.springframework.security.core.userdetails.User principal =
+                (org.springframework.security.core.userdetails.User) SecurityContextHolder.
                 getContext().getAuthentication().getPrincipal();
         return userRepository.findByUsername(principal.getUsername())
-                .orElseThrow(() -> new UsernameNotFoundException("User name not found - " + principal.getUsername()));
+                .orElseThrow(() ->
+                        new UsernameNotFoundException("User name not found - "
+                                + principal.getUsername()));
     }
 
     private void fetchUserAndEnable(VerificationToken verificationToken){
         String username = verificationToken.getAppUser().getUsername();
-        AppUser appUser = userRepository.findByUsername(username).orElseThrow(()-> new EVRouteFinderException("User not found with name "
+        AppUser appUser = userRepository.findByUsername(username).orElseThrow(()->
+                new EVRouteFinderException("User not found with name "
                 + username));
         appUser.setEnabled(true);
         userRepository.save(appUser);
@@ -91,6 +98,24 @@ public class AuthService {
                 loginRequest.getPassword()));
         SecurityContextHolder.getContext().setAuthentication(authenticate);
         String token = jwtProvider.generateToken(authenticate);
-        return new AuthenticationResponse(token, loginRequest.getUsername());
+        return AuthenticationResponse.builder()
+                .authenticationToken(token)
+                .refreshToken(refreshTokenService.generateRefreshToken().getToken())
+                .expiresAt(Instant.now().plusMillis(jwtProvider.getJwtExpirationInMillis()))
+                .username(loginRequest.getUsername())
+                .build();
+
+    }
+
+
+    public AuthenticationResponse refreshToken(RefreshTokenRequest refreshTokenRequest) {
+        refreshTokenService.validateRefreshToken(refreshTokenRequest.getRefreshToken());
+        String token = jwtProvider.generateTokenWithUserName(refreshTokenRequest.getUsername());
+        return AuthenticationResponse.builder()
+                .authenticationToken(token)
+                .refreshToken(refreshTokenRequest.getRefreshToken())
+                .expiresAt(Instant.now().plusMillis(jwtProvider.getJwtExpirationInMillis()))
+                .username(refreshTokenRequest.getUsername())
+                .build();
     }
 }

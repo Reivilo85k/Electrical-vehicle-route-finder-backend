@@ -2,12 +2,15 @@ package finalproject.evroutefinder.controller;
 
 import finalproject.evroutefinder.dto.AuthenticationResponse;
 import finalproject.evroutefinder.dto.LoginRequest;
+import finalproject.evroutefinder.dto.RefreshTokenRequest;
 import finalproject.evroutefinder.dto.RegisterRequest;
 import finalproject.evroutefinder.service.AuthService;
+import finalproject.evroutefinder.service.RefreshTokenService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -15,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
+    private final RefreshTokenService refreshTokenService;
 
     @PostMapping("/signup")
     public ResponseEntity<String> signup(@RequestBody RegisterRequest registerRequest){
@@ -32,5 +36,17 @@ public class AuthController {
     @PostMapping("/login")
     public AuthenticationResponse login(@RequestBody LoginRequest loginRequest){
        return authService.login(loginRequest);
+    }
+
+
+    @PostMapping("refresh/token")
+    public AuthenticationResponse refreshTokens(@Valid @RequestBody RefreshTokenRequest refreshTokenRequest) {
+        return authService.refreshToken(refreshTokenRequest);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout(@Valid @RequestBody RefreshTokenRequest refreshTokenRequest) {
+        refreshTokenService.deleteRefreshToken(refreshTokenRequest.getRefreshToken());
+        return ResponseEntity.status(HttpStatus.OK).body("Refresh Token Deleted Successfully!!");
     }
 }
