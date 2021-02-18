@@ -1,5 +1,6 @@
 package finalproject.evroutefinder.service;
 
+import finalproject.evroutefinder.config.AppConfig;
 import finalproject.evroutefinder.dto.AuthenticationResponse;
 import finalproject.evroutefinder.dto.LoginRequest;
 import finalproject.evroutefinder.dto.RefreshTokenRequest;
@@ -37,6 +38,7 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtProvider jwtProvider;
     private final RefreshTokenService refreshTokenService;
+    private final AppConfig appConfig;
 
     @Transactional
     public void signup(RegisterRequest registerRequest) {
@@ -53,7 +55,7 @@ public class AuthService {
         mailService.sendMail(new NotificationEmail("Please Activate your Account",
                 appUser.getEmail(), "Thank you for signing up to EV Route Finder, " +
                 "please click on the below url to activate your account : " +
-                "http://localhost:8080/api/auth/accountVerification/" + token));
+                appConfig.getAppUrl() + "/api/auth/accountVerification/" + token));
     }
 
     @Transactional(readOnly = true)
