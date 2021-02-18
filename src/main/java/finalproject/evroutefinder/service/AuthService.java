@@ -12,6 +12,7 @@ import finalproject.evroutefinder.repository.UserRepository;
 import finalproject.evroutefinder.repository.VerificationTokenRepository;
 import finalproject.evroutefinder.security.JwtProvider;
 import lombok.AllArgsConstructor;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -56,7 +57,7 @@ public class AuthService {
     }
 
     @Transactional(readOnly = true)
-    AppUser getCurrentAppUser(){
+    public AppUser getCurrentAppUser(){
         org.springframework.security.core.userdetails.User principal =
                 (org.springframework.security.core.userdetails.User) SecurityContextHolder.
                 getContext().getAuthentication().getPrincipal();
@@ -117,5 +118,10 @@ public class AuthService {
                 .expiresAt(Instant.now().plusMillis(jwtProvider.getJwtExpirationInMillis()))
                 .username(refreshTokenRequest.getUsername())
                 .build();
+    }
+
+    public boolean isLoggedIn() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return !(authentication instanceof AnonymousAuthenticationToken) && authentication.isAuthenticated();
     }
 }

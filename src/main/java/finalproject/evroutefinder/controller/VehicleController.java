@@ -9,7 +9,7 @@ import javax.validation.Valid;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/register-vehicle")
+@RequestMapping("/api/vehicle")
 @AllArgsConstructor
 public class VehicleController {
 
