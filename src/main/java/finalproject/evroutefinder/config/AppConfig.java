@@ -16,4 +16,8 @@ public class AppConfig {
     public String getAppUrl() {
         return appUrl;
     }
+
+    public void setAppUrl(String appUrl) {
+        this.appUrl = appUrl;
+    }
 }
