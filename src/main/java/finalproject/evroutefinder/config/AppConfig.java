@@ -8,7 +8,7 @@ import javax.validation.constraints.NotNull;
 
 @Component
 @EnableConfigurationProperties
-@ConfigurationProperties(prefix = "app.url")
+@ConfigurationProperties(prefix = "app")
 public class AppConfig {
     @NotNull
     private String appUrl;
