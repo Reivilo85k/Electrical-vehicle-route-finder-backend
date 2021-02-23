@@ -1,16 +1,14 @@
 package finalproject.evroutefinder.config;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Value;
 
-import javax.validation.constraints.NotNull;
+import org.springframework.context.annotation.Configuration;
 
-@Component
-@EnableConfigurationProperties
-@ConfigurationProperties(prefix = "app")
+
+@Configuration
 public class AppConfig {
-    @NotNull
+
+    @Value("${app.url}")
     private String appUrl;
 
     public String getAppUrl() {
