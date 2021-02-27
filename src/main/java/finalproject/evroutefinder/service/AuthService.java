@@ -22,6 +22,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.io.IOException;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
@@ -41,7 +43,7 @@ public class AuthService {
     private final AppConfig appConfig;
 
     @Transactional
-    public void signup(RegisterRequest registerRequest) {
+    public void signup(RegisterRequest registerRequest) throws IOException {
         AppUser appUser = new AppUser();
         appUser.setUsername(registerRequest.getUsername());
         appUser.setEmail(registerRequest.getEmail());

@@ -1,6 +1,7 @@
 package finalproject.evroutefinder.service;
 
 
+import com.sendgrid.*;
 import finalproject.evroutefinder.exceptions.EVRouteFinderException;
 import finalproject.evroutefinder.model.NotificationEmail;
 import lombok.AllArgsConstructor;
@@ -12,6 +13,8 @@ import org.springframework.mail.javamail.MimeMessagePreparator;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+
 @Service
 @AllArgsConstructor
 @Slf4j
@@ -21,19 +24,26 @@ public class MailService {
     private final MailContentBuilder mailContentBuilder;
 
     @Async
-    public void sendMail(NotificationEmail notificationEmail){
-        MimeMessagePreparator messagePreparator = mimeMessage -> {
-            MimeMessageHelper  messageHelper = new MimeMessageHelper(mimeMessage);
-            messageHelper.setFrom("evroutefinder@email.com");
-            messageHelper.setTo(notificationEmail.getRecipient());
-            messageHelper.setSubject(notificationEmail.getSubject());
-            messageHelper.setText(mailContentBuilder.build(notificationEmail.getBody()));
-        };
+    public void sendMail(NotificationEmail notificationEmail) throws IOException {
+        Email from = new Email("master@olivier-laborde.com");
+        String subject = "Sending with SendGrid is Fun";
+        Email to = new Email("laborde.olivier@gmail.com");
+        Content content = new Content("text/plain", "and easy to do anywhere, even with Java");
+        Mail mail = new Mail(from, subject, to, content);
+
+        SendGrid sg = new SendGrid("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");
+        Request request = new Request();
         try {
-            mailSender.send(messagePreparator);
-            log.info("Activation email sent");
-        }catch (MailException e) {
-            throw new EVRouteFinderException("Exception occurred when sending mail to " + notificationEmail.getRecipient(), e);
+            request.setMethod(Method.POST);
+            request.setEndpoint("mail/send");
+            request.setBody(mail.build());
+            Response response = sg.api(request);
+            System.out.println(response.getStatusCode());
+            System.out.println(response.getBody());
+            System.out.println(response.getHeaders());
+        } catch (IOException ex) {
+            throw ex;
         }
     }
+
 }

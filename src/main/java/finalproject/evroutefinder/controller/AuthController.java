@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -21,7 +22,7 @@ public class AuthController {
     private final RefreshTokenService refreshTokenService;
 
     @PostMapping("/signup")
-    public ResponseEntity<String> signup(@RequestBody RegisterRequest registerRequest){
+    public ResponseEntity<String> signup(@RequestBody RegisterRequest registerRequest) throws IOException {
         authService.signup(registerRequest);
         return new ResponseEntity<>("User Registration Successful",
                 HttpStatus.OK);
