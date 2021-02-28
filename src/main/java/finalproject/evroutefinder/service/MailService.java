@@ -31,7 +31,7 @@ public class MailService {
         Content content = new Content("text/plain", "and easy to do anywhere, even with Java");
         Mail mail = new Mail(from, subject, to, content);
 
-        SendGrid sg = new SendGrid("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");
+        SendGrid sg = new SendGrid("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");
         Request request = new Request();
         try {
             request.setMethod(Method.POST);
