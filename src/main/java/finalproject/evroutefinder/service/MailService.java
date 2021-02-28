@@ -25,7 +25,7 @@ public class MailService {
 
     @Async
     public void sendMail(NotificationEmail notificationEmail) throws IOException {
-        Email from = new Email("master@em9473.olivier-laborde.com");
+        Email from = new Email("master@mail.olivier-laborde.com");
         String subject = "Sending with SendGrid is Fun";
         Email to = new Email("laborde.olivier@gmail.com");
         Content content = new Content("text/plain", "and easy to do anywhere, even with Java");
