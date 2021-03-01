@@ -13,8 +13,11 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry corsRegistry) {
         corsRegistry.addMapping("/**")
-                .allowedOrigins("http://localhost:4200", "http://ev-route-finder.herokuapp.com",
-                                "https://ev-route-finder.olivier-laborde.com", "http://ev-route-finder.olivier-laborde.com")
+                .allowedOrigins("http://localhost:4200",
+                        "http://ev-route-finder.herokuapp.com",
+                        "https://ev-route-finder.herokuapp.com",
+                        "https://ev-route-finder.olivier-laborde.com",
+                        "http://ev-route-finder.olivier-laborde.com")
                 .allowedMethods("*")
                 .maxAge(3600L)
                 .allowedHeaders("*")
