@@ -31,7 +31,9 @@ public class MailService {
         Content content = new Content("text/plain", notificationEmail.getBody());
         Mail mail = new Mail(from, subject, to, content);
 
-        SendGrid sg = new SendGrid(appConfig.getSendgridApiKey());
+        System.out.println(appConfig.getSendgridApiKey());
+
+        SendGrid sg = new SendGrid("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");
         Request request = new Request();
         try {
             request.setMethod(Method.POST);
