@@ -2,6 +2,7 @@ package finalproject.evroutefinder.service;
 
 
 import com.sendgrid.*;
+import finalproject.evroutefinder.config.AppConfig;
 import finalproject.evroutefinder.exceptions.EVRouteFinderException;
 import finalproject.evroutefinder.model.NotificationEmail;
 import lombok.AllArgsConstructor;
@@ -20,18 +21,17 @@ import java.io.IOException;
 @Slf4j
 public class MailService {
 
-    private final JavaMailSender mailSender;
-    private final MailContentBuilder mailContentBuilder;
+    private final AppConfig appConfig;
 
     @Async
     public void sendMail(NotificationEmail notificationEmail) throws IOException {
         Email from = new Email("master@olivier-laborde.com");
-        String subject = "Sending with SendGrid is Fun";
-        Email to = new Email("laborde.olivier@gmail.com");
-        Content content = new Content("text/plain", "and easy to do anywhere, even with Java");
+        String subject = notificationEmail.getSubject();
+        Email to = new Email(notificationEmail.getRecipient());
+        Content content = new Content("text/plain", notificationEmail.getBody());
         Mail mail = new Mail(from, subject, to, content);
 
-        SendGrid sg = new SendGrid("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");
+        SendGrid sg = new SendGrid(appConfig.getSendgridApiKey());
         Request request = new Request();
         try {
             request.setMethod(Method.POST);
