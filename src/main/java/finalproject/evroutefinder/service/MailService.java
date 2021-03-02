@@ -25,7 +25,7 @@ public class MailService {
 
     @Async
     public void sendMail(NotificationEmail notificationEmail) throws IOException {
-        Email from = new Email("master@olivier-laborde.com");
+        Email from = new Email("do-not-reply@olivier-laborde.com");
         String subject = notificationEmail.getSubject();
         Email to = new Email(notificationEmail.getRecipient());
         Content content = new Content("text/plain", notificationEmail.getBody());
