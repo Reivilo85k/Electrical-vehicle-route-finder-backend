@@ -50,6 +50,7 @@ public class AuthService {
         appUser.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
         appUser.setCreated(Instant.now());
         appUser.setEnabled(false);
+        appUser.setAdmin(false);
 
         userRepository.save(appUser);
 
@@ -104,10 +105,12 @@ public class AuthService {
         SecurityContextHolder.getContext().setAuthentication(authenticate);
         String token = jwtProvider.generateToken(authenticate);
         return AuthenticationResponse.builder()
+                .userId(getCurrentAppUser().getUserId())
                 .authenticationToken(token)
                 .refreshToken(refreshTokenService.generateRefreshToken().getToken())
                 .expiresAt(Instant.now().plusMillis(jwtProvider.getJwtExpirationInMillis()))
                 .username(loginRequest.getUsername())
+                .isAdmin(getCurrentAppUser().isAdmin())
                 .build();
 
     }

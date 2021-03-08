@@ -30,5 +30,7 @@ public class Vehicle {
     private Float consumption; // km per 1 kWh (range/capacity)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
-    private AppUser AppUser;
+    private AppUser appUser;
+    @Column(name = "is_default")
+    private Boolean isDefault;
 }

@@ -18,4 +18,6 @@ public class VehicleDto {
     private int capacity;
     private int range;
     private float consumption;
+    private Long userId;
+    private Boolean isDefault;
 }

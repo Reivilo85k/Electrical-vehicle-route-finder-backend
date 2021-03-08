@@ -16,14 +16,20 @@ public class VehicleController {
     private final VehicleService vehicleService;
 
     @GetMapping
-    public List<VehicleDto> getAllVehicles(){
-        return vehicleService.getAll();
+    public List<VehicleDto> getDefaultVehicles(){
+        return vehicleService.getDefaultVehicles(true);
     }
 
     @GetMapping("/{id}")
     public VehicleDto getVehicle(@PathVariable Long id) {
         return vehicleService.getVehicle(id);
     }
+
+    @GetMapping("/user/{userId}")
+    public List<VehicleDto> getUserVehicles(@PathVariable Long userId) {
+        return vehicleService.getUserVehicles(userId);
+    }
+
 
     @PostMapping
     public VehicleDto createVehicle(@RequestBody @Valid VehicleDto vehicleDto){

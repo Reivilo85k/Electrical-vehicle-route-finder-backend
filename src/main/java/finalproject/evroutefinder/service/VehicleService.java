@@ -19,9 +19,15 @@ public class VehicleService {
     private final VehicleRepository vehicleRepository;
     private final AuthService authService;
 
-    @Transactional(readOnly = true)
-    public List<VehicleDto> getAll() {
-        return vehicleRepository.findAll()
+    public List<VehicleDto> getUserVehicles(Long userId) {
+        return vehicleRepository.findByAppUser_UserId(userId)
+                .stream()
+                .map(this::mapToDto)
+                .collect(toList());
+    }
+
+    public List<VehicleDto> getDefaultVehicles(Boolean isDefault) {
+        return vehicleRepository.findByIsDefault(isDefault)
                 .stream()
                 .map(this::mapToDto)
                 .collect(toList());
@@ -48,6 +54,8 @@ public class VehicleService {
                 .capacity(vehicle.getCapacity())
                 .range(vehicle.getRange())
                 .consumption(vehicle.getConsumption())
+                .userId(vehicle.getAppUser().getUserId())
+                .isDefault(vehicle.getIsDefault())
                 .build();
     }
 
@@ -57,11 +65,9 @@ public class VehicleService {
                .capacity(vehicleDto.getCapacity())
                .range(vehicleDto.getRange())
                .consumption(vehicleDto.getConsumption())
-               .AppUser(authService.getCurrentAppUser())
+               .appUser(authService.getCurrentAppUser())
+               .isDefault(vehicleDto.getIsDefault())
                .build();
 
     }
-
-
-
 }
