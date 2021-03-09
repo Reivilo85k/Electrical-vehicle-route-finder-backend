@@ -30,8 +30,8 @@ public class AppUser {
     @NotEmpty(message = "Username is required")
     private String email;
 
-    @Column(name = "isAdmin")
-    private boolean isAdmin;
+    @Column(name = "is_admin")
+    private Boolean isAdmin;
 
     private Instant created;
     private boolean enabled;

@@ -50,7 +50,7 @@ public class AuthService {
         appUser.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
         appUser.setCreated(Instant.now());
         appUser.setEnabled(false);
-        appUser.setAdmin(false);
+        appUser.setIsAdmin(false);
 
         userRepository.save(appUser);
 
@@ -110,7 +110,7 @@ public class AuthService {
                 .refreshToken(refreshTokenService.generateRefreshToken().getToken())
                 .expiresAt(Instant.now().plusMillis(jwtProvider.getJwtExpirationInMillis()))
                 .username(loginRequest.getUsername())
-                .isAdmin(getCurrentAppUser().isAdmin())
+                .isAdmin(getCurrentAppUser().getIsAdmin())
                 .build();
 
     }
